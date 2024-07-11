@@ -22,12 +22,14 @@ class WordTokenizer:
         if special_tokens is None:
             # Default special tokens used in tokenization if not provided
             self.special_tokens = [
-                '[PAD]',
-                '[CLS]',
-                '[SEP]',
-                '[UNK]',
+                '[MSK]',# mask for later usage   0
+                '[PAD]',# padding            1
+                '[CLS]',# class             2
+                '[SEP]',# separate           3
+                '[UNK]',# unknown            4
+                '[SOS]',# start of sentence     5
+                '.',# end of sentence         6
             ]
-
         # Create a vocabulary dictionary with special tokens and input vocabulary
         self.vocab = {word: i for i, word in enumerate(self.special_tokens + sorted(vocab))}
         # Create a reverse vocabulary dictionary for decoding purposes
@@ -45,11 +47,20 @@ class WordTokenizer:
 
         # Truncate the input sentence to fit within the maximum sequence length
         sentence = sentence[:self.max_seq_len - 2]
+        #print(sentence)
         # Convert words to lowercase
-        sentence = [w.lower() for w in sentence]
+        sentence = [w.lower() for w in sentence if w != ','] # delete ',' in sentence
+        #print(type(sentence))
+        for i in range(len(sentence)): # divide coment into sentences
+            if sentence[i] == '.':
+                sentence.insert(i + 1, '[SOS]') # start of sentence
+        
+        sentence = sentence[:self.max_seq_len -4]
         # Add special tokens ([CLS], [SEP]) and padding tokens ([PAD]) to the input sentence
-        sentence = ['[CLS]'] + sentence + ['[SEP]'] + ['[PAD]'] * (self.max_seq_len - len(sentence) - 2)
+        sentence = ['[CLS]'] + ['[SOS]'] + sentence + ['.'] + ['[SEP]'] + ['[PAD]'] * (self.max_seq_len - len(sentence) - 4)
+        #print(sentence)
         # Map words to their corresponding IDs in the vocabulary or use [UNK] token if not found
+        
         return torch.tensor([self.vocab[w] if w in self.vocab else self.vocab['[UNK]'] for w in sentence],
                             dtype=torch.long)
 
