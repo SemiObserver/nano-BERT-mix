@@ -54,7 +54,7 @@ class ALBertEmbeddings(torch.nn.Module):
 
         self.hid_embeddings = torch.nn.Embedding(vocab_size, n_hid) # number of words is length of text, each words has length n_embed
 
-        self.word_embeddings = torch.nn.Embedding(n_hid, n_embed) # number of words is length of text, each words has length n_embed
+        self.word_embeddings = torch.nn.Linear(n_hid, n_embed) # number of words is length of text, each words has length n_embed
     def forward(self, x):
         hid_embeddings = self.hid_embeddings(x)
         
@@ -187,8 +187,8 @@ class ALBertEncoder(torch.nn.Module):
         self.layer = BertLayer(n_heads, dropout, n_embed)
 
     def forward(self, x, mask):
-        for i in range(n_layers):
-            x = layer(x, mask)
+        for i in range(self.n_layers):
+            x = self.layer(x, mask)
         return x
 
 class BertPooler(torch.nn.Module):

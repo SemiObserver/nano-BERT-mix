@@ -2,6 +2,7 @@ import torch
 import random
 from tqdm import tqdm
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -161,3 +162,47 @@ def nsp_gen(spit, n_st, max_seq_len): # generate nsp input
                 id_s = random.randint(0, n_st - 1)
             nsp[2 * id_i + 1] = pad_nsp(torch.cat((spit[id_i], spit[id_s]), 0), max_seq_len) # a sentence not followed by the next
     return nsp.long().to(device)
+
+def plot_results(history, model, do_val=True):
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    x = list(range(0, len(history['train_losses'])))
+
+    # loss
+
+    ax.plot(x, history['train_losses'], label='train_loss')
+
+    if do_val:
+        ax.plot(x, history['val_losses'], label='val_loss')
+
+    plt.title(model + ' Train / Validation Loss')
+    plt.legend(loc='upper right')
+    plt.savefig('pic/' + model + 'Loss')
+
+    # accuracy
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    ax.plot(x, history['train_acc'], label='train_acc')
+
+    if do_val:
+        ax.plot(x, history['val_acc'], label='val_acc')
+
+    plt.title(model + ' Train / Validation Accuracy')
+    plt.legend(loc='upper left')
+    plt.savefig('pic/' + model + ' Accuracy')
+
+    # f1-score
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    ax.plot(x, history['train_f1'], label='train_f1')
+
+    if do_val:
+        ax.plot(x, history['val_f1'], label='val_f1')
+
+    plt.title(model + ' Train / Validation F1')
+    plt.legend(loc='upper left')
+    plt.savefig('pic/' + model + 'Train_Validation Accuracy')
+
+    fig.show()
